@@ -1,0 +1,227 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ใส่หวย</title>
+<style>
+    /* --- Body and layout --- */
+    body {
+        font-family: 'Arial', sans-serif;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        min-height: 100vh;
+        background: linear-gradient(to right, hsl(41, 100%, 85%), #ffdabe);
+        margin: 0;
+        padding: 0;
+    }
+
+    h1 {
+        text-align: center;
+        margin-bottom: 30px;
+        color: #db830f;
+        font-size: 2.5em;
+        text-shadow: 1px 1px 3px rgba(0,0,0,0.2);
+    }
+
+    /* --- Inputs --- */
+    #inputs input {
+        width: 50px;
+        height: 50px;
+        font-size: 24px;
+        text-align: center;
+        margin: 5px;
+        border-radius: 10px;
+        border: 2px solid #c77700;
+        transition: all 0.2s ease;
+    }
+
+    #inputs input:focus {
+        outline: none;
+        border-color: #ff6b6b;
+        box-shadow: 0 0 8px rgba(255,107,107,0.6);
+    }
+
+    /* --- Button --- */
+    #checkBtn {
+        margin-top: 25px;
+        padding: 12px 30px;
+        font-size: 18px;
+        cursor: pointer;
+        border: none;
+        border-radius: 10px;
+        background-color: #ff9e44;
+        color: white;
+        transition: 0.3s;
+    }
+
+    #checkBtn:hover {
+        background-color: #b3a57f;
+    }
+
+    /* --- Message --- */
+    #message {
+        margin-top: 25px;
+        font-size: 24px;
+        font-weight: bold;
+        min-height: 30px;
+    }
+
+    /* --- Confetti --- */
+    .confetti-piece {
+        position: fixed;
+        width: 10px;
+        height: 10px;
+        background-color: red;
+        top: 0;
+        z-index: 9999;
+        opacity: 0.8;
+        pointer-events: none;
+        animation: fall 3s linear forwards;
+    }
+
+    @keyframes fall {
+        to {
+            transform: translateY(100vh) rotate(360deg);
+            opacity: 0;
+        }
+    }
+</style>
+</head>
+<body>
+<h1>Lottery Number Checker</h1>
+<form id="codeForm">
+    <div id="inputs">
+        <input type="text" maxlength="1">
+        <input type="text" maxlength="1">
+        <input type="text" maxlength="1">
+        <input type="text" maxlength="1">
+        <input type="text" maxlength="1">
+        <input type="text" maxlength="1">
+    </div>
+    <button type="submit" id="checkBtn">Check</button>
+</form>
+<div id="message"></div>
+
+<script>
+const form = document.getElementById('codeForm');
+const inputs = document.querySelectorAll('#inputs input');
+const message = document.getElementById('message');
+
+// Auto move to next input
+inputs.forEach((input, index) => {
+    input.addEventListener('input', () => {
+        if (input.value.length === 1 && index < inputs.length - 1) {
+            inputs[index + 1].focus();
+        }
+    });
+    input.addEventListener('keydown', (event) => {
+        if (event.key === 'Backspace' && input.value === '' && index > 0) {
+            inputs[index - 1].focus();
+        }
+    });
+});
+
+// Prize list with quantities
+const prizes = [
+    {name: "ทุเรียน", qty: 2},
+    {name: "ถุงผ้า", qty: 15},
+    {name: "ยาดม", qty: 5},
+    {name: "ไฮไลท์", qty: 37},
+    {name: "พวงกุญเเจ", qty: 37},
+    {name: "ปากกา", qty: 50},
+    {name: "ถุงรูด", qty: 25},
+    {name: "ตุ๊กตาช้างจิ๋ว", qty: 5},
+    {name: "ตุ๊กตาช้าง", qty: 3},
+    {name: "บอล", qty: 20},
+    {name: "อ้วก", qty: 20},
+    {name: "สกุลชี่", qty: 10},
+    {name: "ชุดระบายสี", qty: 34},
+    {name: "ยำยำช้างน้อย", qty: 108}
+];
+
+// 350 lottery numbers
+const numbers = [
+"286564","896120","583014","195306","107482","750617","302471","985601","861384","915188",
+"007349","279668","253709","287203","276509","389022","020841","191131","452086","938264",
+"312587","015782","412968","283750","212055","589856","031948","824804","674103","100307",
+"118050","238617","058720","726481","644731","836401","437219","070828","804319","056731",
+"029681","140289","584682","893330","788457","847762","922580","915360","502673","621470",
+"750613","719203","325089","513454","250500","958276","268534","889875","024619","507007",
+"252980","681867","176591","625403","972080","928274","985328","540639","206190","802305",
+"948713","778276","859882","095068","049952","240270","730903","499729","607908","066571",
+"148437","676007","104687","850519","176420","449789","292549","870852","640744","223782",
+"541489","659166","666094","577324","640395","801316","933082","763790","840794","958338",
+"481964","869836","647688","708068","219662","223282","746396","959898","551808","085808",
+"956395","678249","453613","379925","743792","790913","613552","277442","296576","683264",
+"566638","686482","666983","149964","865685","100535","553119","380701","148405","520000",
+"283039","127915","219885","911878","972598","076861","441854","596330","816453","464345",
+"758299","308324","019630","565620","149238","716133","344699","723846","860467","631925",
+"697988","841026","056397","327814","490172","703865","229531","108435","665729","934210",
+"517608","587104","906423","860391","451870","739206","813902","062751","236849","195267",
+"643098","770513","521307","397045","407628","625139","140863","120496","693758","486120",
+"074961","719082","894316","985014","367281","532049","927160","309856","418207","650193",
+"163472","789630","140853","923109","194051","431775","134553","037243","746175","999923",
+"957209","352773","436753","625054","152044","622306","436717","946789","239453","604981",
+"188351","538820","785629","516187","732575","549068","802772","410366","353011","874185",
+"970199","684407","405888","004322","735345","024538","251756","513166","236624","798375",
+"209035","581892","789938","079699","815740","314725","552647","959145","773349","967633",
+"969901","047097","219025","163978","270915","812143","747561","570040","205534","820646",
+"544577","742681","155753","132743","403412","225384","501982","629145","084217","610947",
+"117283","943120","809641","253014","734826","701352","110498","062735","367950","284913",
+"548720","172054","413290","859130","097103","361879","934520","073851","506278","652740",
+"001647","703195","925134","389405","360019","471236","543280","184605","298704","309714",
+"321598","179452","270834","091624","552781","148209","222570","608329","812376","438216",
+"364982","019745","192430","415982","705318","676453","947812","833027","388065","744390",
+"785463","011092","650912","850244","258583","108485","876449","817841","823209","836117",
+"234808","843486","966350","490479","759391","130154","169544","645358","223033","868234",
+"035938","684813","521399","117603","553314","120457","380757","136326","281001","110443",
+"000294","275228","261577","754000","837175","666438","715668","962229","980446"
+]; 
+
+// Build prize map
+const prizeMap = {};
+let prizeIndex = 0;
+let count = 0;
+
+numbers.forEach(number => {
+    prizeMap[number] = prizes[prizeIndex].name;
+    count++;
+    if (count >= prizes[prizeIndex].qty) {
+        prizeIndex++;
+        count = 0;
+    }
+});
+
+// --- Confetti animation ---
+function launchConfetti() {
+    for(let i=0; i<150; i++){
+        const confetti = document.createElement('div');
+        confetti.classList.add('confetti-piece');
+        confetti.style.backgroundColor = `hsl(${Math.random()*360}, 100%, 50%)`;
+        confetti.style.left = Math.random()*100 + 'vw';
+        confetti.style.animationDuration = 2 + Math.random()*3 + 's';
+        confetti.style.width = confetti.style.height = 5 + Math.random()*10 + 'px';
+        document.body.appendChild(confetti);
+        setTimeout(() => confetti.remove(), 4000);
+    }
+}
+
+// --- Form submission ---
+form.addEventListener('submit', function(event) {
+    event.preventDefault();
+    const code = Array.from(inputs).map(input => input.value).join('');
+    if(prizeMap[code]) {
+        message.textContent = `🎉 คุณได้รับรางวัล: ${prizeMap[code]}! 🎉`;
+        message.style.color = "green";
+        launchConfetti();
+    } else {
+        message.textContent = "เลขนี้ไม่มีรางวัล";
+        message.style.color = "red";
+    }
+});
+</script>
+</body>
+</html>
