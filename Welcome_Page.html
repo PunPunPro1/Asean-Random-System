@@ -19,10 +19,11 @@
 
       #bg-video {
         position: fixed;
-        right: 0;
-        bottom: 0;
+        top: 50%;
+        left: 50%;
         min-width: 100%;
         min-height: 100%;
+        transform: translate(-50%, -50%);
         object-fit: cover;
         z-index: -2;
         opacity: 0;
@@ -87,6 +88,18 @@
         to {
           opacity: 1;
         }
+      }
+
+      @media screen and (max-width: 768px) {
+        .content h1 {
+          font-size: 3rem;
+        }
+
+        .btn {
+          padding: 10px 20px;
+          font-size: 1rem;
+        }
+        
       }
 
     </style>
